@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalcForge — Precision Engineering Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0d0f12;
+    --bg2: #13161b;
+    --bg3: #1c2028;
+    --border: #2a2f3a;
+    --border2: #353c4a;
+    --text: #e8eaf0;
+    --text2: #8892a4;
+    --text3: #555f72;
+    --accent: #4fc3f7;
+    --accent2: #0288d1;
+    --accent-glow: rgba(79,195,247,0.15);
+    --accent-glow2: rgba(79,195,247,0.06);
+    --green: #4caf82;
+    --amber: #f5a623;
+    --red: #e05c5c;
+    --card: #161b22;
+    --card-hover: #1d2330;
+    --shadow: 0 4px 32px rgba(0,0,0,0.5);
+    --toggle-bg: #1c2028;
+    --toggle-knob: #4fc3f7;
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f6f9;
+    --bg2: #ffffff;
+    --bg3: #eef1f6;
+    --border: #d8dde8;
+    --border2: #c4cad8;
+    --text: #1a1f2e;
+    --text2: #4a5568;
+    --text3: #9aa3b4;
+    --accent: #0277bd;
+    --accent2: #01579b;
+    --accent-glow: rgba(2,119,189,0.1);
+    --accent-glow2: rgba(2,119,189,0.04);
+    --green: #2e7d5e;
+    --amber: #c67c00;
+    --red: #c0392b;
+    --card: #ffffff;
+    --card-hover: #f0f4fa;
+    --shadow: 0 4px 32px rgba(0,0,0,0.08);
+    --toggle-bg: #d8dde8;
+    --toggle-knob: #0277bd;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+  }
+
+  /* GRID TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 64px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    transition: background 0.3s ease;
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text2);
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+
+  /* THEME TOGGLE */
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .toggle-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    user-select: none;
+    min-width: 28px;
+  }
+  .toggle-track {
+    width: 44px;
+    height: 24px;
+    background: var(--toggle-bg);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    position: relative;
+    transition: background 0.3s ease;
+    cursor: pointer;
+  }
+  .toggle-knob {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    background: var(--toggle-knob);
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1), background 0.3s ease;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+  [data-theme="light"] .toggle-knob { transform: translateX(20px); }
+
+  .nav-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 40px 80px;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.25s forwards;
+  }
+  .hero-title em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--text2);
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.4s forwards;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.55s forwards;
+  }
+
+  .btn-primary {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); }
+
+  .btn-secondary {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+    padding: 14px 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  .hero-metrics {
+    display: flex;
+    gap: 48px;
+    margin-top: 80px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.7s forwards;
+  }
+  .metric { text-align: center; }
+  .metric-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: -0.03em;
+  }
+  .metric-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  /* FEATURES STRIP */
+  .features-strip {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    padding: 20px 40px;
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+    transition: background 0.3s ease;
+  }
+  .strip-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+  .strip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* SECTION */
+  section { position: relative; z-index: 1; }
+
+  .section-pad { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    color: var(--text2);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 500px;
+    font-weight: 300;
+  }
+
+  /* TOOL CARDS */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  .tool-card {
+    background: var(--card);
+    padding: 32px;
+    transition: background 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .tool-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
+  }
+  .tool-card:hover { background: var(--card-hover); }
+  .tool-card:hover::after { transform: scaleX(1); }
+
+  .tool-icon {
+    width: 40px; height: 40px;
+    background: var(--accent-glow);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+  }
+  .tool-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  .tool-desc {
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  .tool-tag {
+    margin-top: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .tool-tag.live { color: var(--green); }
+  .tool-tag.soon { color: var(--amber); }
+
+  /* ============================
+     PRESTRESSED BEAM CALCULATOR
+     ============================ */
+  .calc-section {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s ease;
+  }
+
+  .calc-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .calc-panel {
+    padding: 60px 48px;
+    border-right: 1px solid var(--border);
+  }
+  .calc-results-panel {
+    padding: 60px 48px;
+  }
+
+  .calc-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .calc-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 36px;
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+  }
+  .input-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 7px;
+  }
+  .input-label-text {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .input-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: border-color 0.2s ease;
+    overflow: hidden;
+  }
+  .input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow2); }
+
+  .calc-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text);
+    width: 100%;
+  }
+  .calc-input::placeholder { color: var(--text3); }
+
+  .input-suffix {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text3);
+    padding: 0 12px;
+    border-left: 1px solid var(--border);
+    height: 40px;
+    display: flex;
+    align-items: center;
+    background: var(--bg2);
+    white-space: nowrap;
+  }
+
+  .inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .section-divider {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    margin: 24px 0 20px;
+  }
+
+  .calc-btn {
+    width: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .calc-btn:hover { opacity: 0.85; transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+  .calc-btn:active { transform: translateY(0); }
+
+  /* RESULTS */
+  .results-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .results-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 32px;
+  }
+
+  .result-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: border-color 0.3s ease;
+  }
+  .result-card.pass { border-left: 3px solid var(--green); }
+  .result-card.warn { border-left: 3px solid var(--amber); }
+  .result-card.fail { border-left: 3px solid var(--red); }
+
+  .result-name {
+    font-size: 0.82rem;
+    color: var(--text2);
+    margin-bottom: 3px;
+  }
+  .result-detail {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+  }
+  .result-val {
+    text-align: right;
+  }
+  .result-num {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .result-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+  }
+  .result-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+  .result-status.pass { color: var(--green); }
+  .result-status.warn { color: var(--amber); }
+  .result-status.fail { color: var(--red); }
+
+  /* BEAM DIAGRAM */
+  .beam-diagram {
+    margin: 28px 0 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    position: relative;
+  }
+  .diagram-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 14px;
+  }
+  svg.beam-svg { width: 100%; height: 90px; overflow: visible; }
+
+  .stress-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .stress-bar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .stress-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .stress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+  .stress-bar-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text2);
+    width: 70px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .placeholder-msg {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+  }
+  .placeholder-icon { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.3; }
+
+  /* FOOTER */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    padding: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+  .footer-logo span { color: var(--accent); }
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SCROLLED-IN ITEMS */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .calc-wrapper { grid-template-columns: 1fr; }
+    .calc-panel { border-right: none; border-bottom: 1px solid var(--border); padding: 40px 24px; }
+    .calc-results-panel { padding: 40px 24px; }
+    .inputs-grid { grid-template-columns: 1fr; }
+    .hero-metrics { gap: 24px; flex-wrap: wrap; justify-content: center; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Calc<span>Forge</span></div>
+  <ul class="nav-links">
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#calculator">Demo</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+      <span class="toggle-label" id="theme-label">DARK</span>
+      <div class="toggle-track">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label" id="theme-label-r">LIGHT</span>
+    </div>
+    <button class="nav-cta" onclick="document.getElementById('calculator').scrollIntoView({behavior:'smooth'})">Try Demo</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-tag">Beta — Free Engineering Tools</div>
+  <h1 class="hero-title">
+    Precision<br>
+    <em>Engineering</em><br>
+    Calculations
+  </h1>
+  <p class="hero-sub">
+    Professional-grade structural and multi-discipline calculators built for engineers. Fast, accurate, exportable.
+  </p>
+  <div class="hero-actions">
+    <a href="#calculator" class="btn-primary">Try Prestressed Beam →</a>
+    <a href="#tools" class="btn-secondary">View All Tools</a>
+  </div>
+  <div class="hero-metrics">
+    <div class="metric">
+      <div class="metric-val">12+</div>
+      <div class="metric-label">Calc Modules</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">EN / ACI</div>
+      <div class="metric-label">Standards</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">PDF</div>
+      <div class="metric-label">Export Ready</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">Free</div>
+      <div class="metric-label">Always</div>
+    </div>
+  </div>
+</section>
+
+<!-- STRIP -->
+<div class="features-strip">
+  <div class="strip-item"><div class="strip-dot"></div>Structural Analysis</div>
+  <div class="strip-item"><div class="strip-dot"></div>Prestressed Concrete</div>
+  <div class="strip-item"><div class="strip-dot"></div>Steel Design</div>
+  <div class="strip-item"><div class="strip-dot"></div>Fluid Mechanics</div>
+  <div class="strip-item"><div class="strip-dot"></div>Geotechnical</div>
+  <div class="strip-item"><div class="strip-dot"></div>Thermodynamics</div>
+</div>
+
+<!-- TOOLS GRID -->
+<section id="tools">
+  <div class="section-pad">
+    <div class="reveal">
+      <div class="section-label">Engineering Modules</div>
+      <h2 class="section-title">Tools Built for<br>Real Problems</h2>
+      <p class="section-sub">Each module handles the full calculation chain — inputs, verification, output reporting.</p>
+    </div>
+    <div class="tools-grid reveal">
+      <div class="tool-card">
+        <div class="tool-icon">⟂</div>
+        <div class="tool-name">Prestressed Beam Analysis</div>
+        <div class="tool-desc">Full pre-tensioned and post-tensioned beam design. Stress checks, deflection, shear capacity.</div>
+        <div class="tool-tag live">● Live Demo Below</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">⊞</div>
+        <div class="tool-name">RC Section Design</div>
+        <div class="tool-desc">Reinforced concrete beam and column design to Eurocode 2 and ACI 318.</div>
+        <div class="tool-tag soon">◌ Coming Soon</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">△</div>
+        <div class="tool-name">Steel Frame Analysis</div>
+        <div class="tool-desc">Member capacity checks, connection design, and stability verification to EC3.</div>
+        <div class="tool-tag soon">◌ Coming Soon</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">∿</div>
+        <div class="tool-name">Pipe Flow & Hydraulics</div>
+        <div class="tool-desc">Pressure drop, flow rate, pump sizing and network analysis for closed conduit systems.</div>
+        <div class="tool-tag soon">◌ Coming Soon</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">⊕</div>
+        <div class="tool-name">Foundation Design</div>
+        <div class="tool-desc">Pad, strip and raft foundation bearing capacity and settlement calculations.</div>
+        <div class="tool-tag soon">◌ Coming Soon</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">≈</div>
+        <div class="tool-name">Unit Converter</div>
+        <div class="tool-desc">Multi-discipline unit conversion across structural, thermal, fluid and electrical domains.</div>
+        <div class="tool-tag soon">◌ Coming Soon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================
+     PRESTRESSED BEAM CALC
+     ======================== -->
+<section class="calc-section" id="calculator">
+  <div class="calc-wrapper">
+
+    <!-- INPUTS -->
+    <div class="calc-panel">
+      <div class="calc-title">Prestressed Beam</div>
+      <div class="calc-subtitle">Simple Span · Rectangular Section · Pre-tensioned</div>
+
+      <div class="section-divider">Section Geometry</div>
+      <div class="inputs-grid">
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Width (b)</span>
+          </div>
+          <div class="input-row">
+            <input class="calc-input" type="number" id="b" value="300" min="50" max="2000">
+            <span class="input-suffix">mm</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Depth (h)</span>
+          </div>
+          <div class="input-row">
+            <input class="calc-input" type="number" id="h" value="600" min="100" max="3000">
+            <span class="input-suffix">mm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider">Span & Loading</div>
+      <div class="inputs-grid">
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Span (L)</span>
+          </div>
+          <div class="input-row">
+            <input class="calc-input" type="number" id="L" value="12" min="1" max="50" step="0.5">
+            <span class="input-suffix">m</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">UDL (w)</span>
+          </div>
+          <div class="input-row">
+            <input class="calc-input" type="number" id="w" value="25" min="0" max="500">
+            <span class="input-suffix">kN/m</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider">Prestress</div>
+      <div class="inputs-grid">
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Prestress Force (P)</span>
+          </div>
+          <div class="input-row">
+            <input class="calc-input" type="number" id="P" value="1200" min="0" max="20000">
+            <span class="input-suffix">kN</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Eccentricity (e)</span>
+          </div>
+          <div class="input-row">
+            <input class="calc-input" type="number" id="e" value="180" min="0" max="1000">
+            <span class="input-suffix">mm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider">Material</div>
+      <div class="inputs-grid">
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">fck (concrete)</span>
+          </div>
+          <div class="input-row">
+            <input class="calc-input" type="number" id="fck" value="40" min="20" max="90">
+            <span class="input-suffix">MPa</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Elastic Modulus (Ec)</span>
+          </div>
+          <div class="input-row">
+            <input class="calc-input" type="number" id="Ec" value="35" min="20" max="50">
+            <span class="input-suffix">GPa</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calculate()">Calculate →</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="calc-results-panel" id="results-panel">
+      <div id="results-placeholder">
+        <div class="placeholder-msg">
+          <div class="placeholder-icon">⟂</div>
+          Enter parameters and click<br>Calculate to see results.
+        </div>
+      </div>
+      <div id="results-content" style="display:none">
+        <div class="results-title">Calculation Results</div>
+        <div class="results-subtitle">Prestressed Beam · Midspan Stresses · EN 1992</div>
+
+        <div class="diagram-label">Section & Tendon Diagram</div>
+        <div class="beam-diagram">
+          <svg class="beam-svg" id="beam-svg" viewBox="0 0 340 90"></svg>
+        </div>
+
+        <div id="result-cards"></div>
+
+        <div style="margin-top:24px">
+          <div class="diagram-label" style="margin-bottom:12px">Stress Distribution</div>
+          <div class="stress-bar">
+            <div class="stress-bar-label">Top Fibre</div>
+            <div class="stress-bar-track"><div class="stress-bar-fill" id="bar-top" style="background:var(--accent);width:0%"></div></div>
+            <div class="stress-bar-val" id="bar-top-val">—</div>
+          </div>
+          <div class="stress-bar">
+            <div class="stress-bar-label">Bottom Fibre</div>
+            <div class="stress-bar-track"><div class="stress-bar-fill" id="bar-bot" style="background:var(--green);width:0%"></div></div>
+            <div class="stress-bar-val" id="bar-bot-val">—</div>
+          </div>
+          <div class="stress-bar">
+            <div class="stress-bar-label">Deflection</div>
+            <div class="stress-bar-track"><div class="stress-bar-fill" id="bar-def" style="background:var(--amber);width:0%"></div></div>
+            <div class="stress-bar-val" id="bar-def-val">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-pad">
+    <div class="reveal" style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center">
+      <div>
+        <div class="section-label">About CalcForge</div>
+        <h2 class="section-title">Built by Engineers,<br>For Engineers</h2>
+        <p class="section-sub" style="margin-bottom:20px">
+          CalcForge is an ambitious open platform for engineering calculations — multi-discipline, standards-referenced, and built to be actually useful in practice.
+        </p>
+        <p class="section-sub">
+          Every module is designed to be transparent: you can see the full calculation chain, reference the clause used, and export a clean PDF report for your design package.
+        </p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="result-card pass">
+          <div><div class="result-name">Standards Referenced</div><div class="result-detail">EN 1992, EN 1993, ACI 318, BS 8110</div></div>
+          <div class="result-val"><div class="result-num">✓</div></div>
+        </div>
+        <div class="result-card pass">
+          <div><div class="result-name">Full Calc Transparency</div><div class="result-detail">Every formula shown with clause reference</div></div>
+          <div class="result-val"><div class="result-num">✓</div></div>
+        </div>
+        <div class="result-card pass">
+          <div><div class="result-name">PDF Export</div><div class="result-detail">Structured output for design packages</div></div>
+          <div class="result-val"><div class="result-num">✓</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Calc<span>Forge</span></div>
+  <div class="footer-copy">© 2026 CalcForge · Built with precision</div>
+</footer>
+
+<script>
+  // THEME TOGGLE
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    document.getElementById('theme-label').style.opacity = current === 'dark' ? '0.4' : '1';
+    document.getElementById('theme-label-r').style.opacity = current === 'dark' ? '1' : '0.4';
+  }
+  document.getElementById('theme-label-r').style.opacity = '0.4';
+
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // BEAM DIAGRAM SVG
+  function drawBeamDiagram(b, h, e, P) {
+    const svg = document.getElementById('beam-svg');
+    const W = 340, H = 90;
+    const bw = 80, bh = Math.min(60, Math.max(28, h / 12));
+    const bx = (W - bw) / 2, by = (H - bh) / 2;
+    const tendonY = by + bh * 0.5 + (e / h) * bh * 0.8;
+    svg.innerHTML = `
+      <!-- supports -->
+      <polygon points="${bx-2},${by+bh} ${bx-14},${by+bh+14} ${bx+10},${by+bh+14}" fill="none" stroke="var(--text3)" stroke-width="1.5"/>
+      <polygon points="${bx+bw+2},${by+bh} ${bx+bw-10},${by+bh+14} ${bx+bw+14},${by+bh+14}" fill="none" stroke="var(--text3)" stroke-width="1.5"/>
+      <!-- beam section -->
+      <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="var(--bg3)" stroke="var(--border2)" stroke-width="1.5" rx="1"/>
+      <!-- neutral axis -->
+      <line x1="${bx+4}" y1="${by+bh/2}" x2="${bx+bw-4}" y2="${by+bh/2}" stroke="var(--text3)" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- tendon -->
+      <line x1="${bx-32}" y1="${tendonY}" x2="${bx+bw+32}" y2="${tendonY}" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="${bx+bw/2}" cy="${tendonY}" r="4" fill="var(--accent)"/>
+      <!-- arrows for P -->
+      <text x="${bx-38}" y="${tendonY+4}" font-family="DM Mono,monospace" font-size="8" fill="var(--accent)">P→</text>
+      <text x="${bx+bw+6}" y="${tendonY+4}" font-family="DM Mono,monospace" font-size="8" fill="var(--accent)">←P</text>
+      <!-- labels -->
+      <text x="${bx+bw+6}" y="${by+bh/2+4}" font-family="DM Mono,monospace" font-size="7" fill="var(--text3)">N.A.</text>
+      <text x="8" y="${by+bh/2+4}" font-family="DM Mono,monospace" font-size="7" fill="var(--text3)">${b}×${h}</text>
+    `;
+  }
+
+  // MAIN CALCULATION
+  function calculate() {
+    const b  = parseFloat(document.getElementById('b').value);   // mm
+    const h  = parseFloat(document.getElementById('h').value);   // mm
+    const L  = parseFloat(document.getElementById('L').value);   // m
+    const w  = parseFloat(document.getElementById('w').value);   // kN/m
+    const P  = parseFloat(document.getElementById('P').value) * 1000; // N
+    const e  = parseFloat(document.getElementById('e').value);   // mm
+    const fck= parseFloat(document.getElementById('fck').value); // MPa
+    const Ec = parseFloat(document.getElementById('Ec').value) * 1000; // MPa
+
+    // Section properties
+    const A  = b * h;                    // mm²
+    const I  = (b * h * h * h) / 12;    // mm⁴
+    const Zt = I / (h / 2);             // mm³ top
+    const Zb = I / (h / 2);             // mm³ bottom (symmetric)
+
+    // Bending moment at midspan (kN·m → N·mm)
+    const M  = (w * L * L / 8) * 1e6;   // N·mm
+
+    // Stresses at midspan (N/mm² = MPa)
+    // Direct compression: P/A
+    // Bending from eccentricity: P·e/Z
+    // Applied moment: M/Z
+    const f_top = -(P / A) + (P * e / Zt) - (M / Zt);  // +ve tension
+    const f_bot = -(P / A) - (P * e / Zb) + (M / Zb);  // +ve tension
+
+    // Allowable stresses (EN 1992 simplified)
+    const f_allow_comp = -0.6 * fck;         // MPa compression limit
+    const f_allow_tens = 0.3 * Math.pow(fck, 2/3); // MPa tension limit (fctm)
+
+    // Deflection (net: imposed - prestress camber)
+    const EcI = Ec * I * 1e-6;              // N·mm² → kN·m²  (approx)
+    const EcI_Nmm2 = Ec * I;               // N·mm²
+    const delta_load  = (5 * w * 1000 * Math.pow(L * 1000, 4)) / (384 * EcI_Nmm2); // mm
+    const delta_pre   = (P * e * Math.pow(L * 1000, 2)) / (8 * EcI_Nmm2);          // mm (upward camber)
+    const delta_net   = delta_load - delta_pre;
+    const delta_limit = (L * 1000) / 250;   // mm, L/250 limit
+
+    // Status helpers
+    function status(val, compLim, tensLim) {
+      if (val < compLim) return 'fail';
+      if (val > tensLim * 1.1) return 'warn';
+      return 'pass';
+    }
+
+    const topStatus = (f_top < f_allow_comp) ? 'fail' : (f_top > f_allow_tens) ? 'warn' : 'pass';
+    const botStatus = (f_bot < f_allow_comp) ? 'fail' : (f_bot > f_allow_tens) ? 'warn' : 'pass';
+    const defStatus = (Math.abs(delta_net) > delta_limit) ? 'fail' : (Math.abs(delta_net) > delta_limit * 0.8) ? 'warn' : 'pass';
+
+    function statusLabel(s) {
+      return s === 'pass' ? 'PASS' : s === 'warn' ? 'CHECK' : 'FAIL';
+    }
+
+    // Build result cards
+    const cards = [
+      {
+        name: 'Bending Moment (midspan)',
+        detail: `wL²/8 · w=${w}kN/m · L=${L}m`,
+        val: (M/1e6).toFixed(1), unit: 'kN·m',
+        status: 'pass', statusLabel: 'INFO'
+      },
+      {
+        name: 'Top Fibre Stress',
+        detail: `Limit comp: ${f_allow_comp.toFixed(1)} MPa | tens: +${f_allow_tens.toFixed(2)} MPa`,
+        val: f_top.toFixed(2), unit: 'MPa',
+        status: topStatus, statusLabel: statusLabel(topStatus)
+      },
+      {
+        name: 'Bottom Fibre Stress',
+        detail: `Limit comp: ${f_allow_comp.toFixed(1)} MPa | tens: +${f_allow_tens.toFixed(2)} MPa`,
+        val: f_bot.toFixed(2), unit: 'MPa',
+        status: botStatus, statusLabel: statusLabel(botStatus)
+      },
+      {
+        name: 'Net Midspan Deflection',
+        detail: `Load: +${delta_load.toFixed(1)}mm · Camber: −${delta_pre.toFixed(1)}mm · Limit: L/250 = ${delta_limit.toFixed(0)}mm`,
+        val: delta_net.toFixed(1), unit: 'mm',
+        status: defStatus, statusLabel: statusLabel(defStatus)
+      },
+      {
+        name: 'Prestress Eccentricity Ratio',
+        detail: `e/kern: effective use of section depth`,
+        val: (e / h * 100).toFixed(1), unit: '% of h',
+        status: 'pass', statusLabel: 'INFO'
+      }
+    ];
+
+    let html = '';
+    cards.forEach(c => {
+      html += `
+        <div class="result-card ${c.status}">
+          <div>
+            <div class="result-name">${c.name}</div>
+            <div class="result-detail">${c.detail}</div>
+          </div>
+          <div class="result-val">
+            <div class="result-num">${c.val}</div>
+            <div class="result-unit">${c.unit}</div>
+            <div class="result-status ${c.status}">${c.statusLabel}</div>
+          </div>
+        </div>`;
+    });
+    document.getElementById('result-cards').innerHTML = html;
+
+    // Stress bars
+    const maxStress = Math.abs(f_allow_comp);
+    function pct(v) { return Math.min(100, Math.abs(v) / maxStress * 100).toFixed(1); }
+    document.getElementById('bar-top').style.width = pct(f_top) + '%';
+    document.getElementById('bar-top-val').textContent = f_top.toFixed(2) + ' MPa';
+    document.getElementById('bar-bot').style.width = pct(f_bot) + '%';
+    document.getElementById('bar-bot-val').textContent = f_bot.toFixed(2) + ' MPa';
+    const defPct = Math.min(100, Math.abs(delta_net) / delta_limit * 100).toFixed(1);
+    document.getElementById('bar-def').style.width = defPct + '%';
+    document.getElementById('bar-def-val').textContent = Math.abs(delta_net).toFixed(1) + ' mm';
+
+    // Draw diagram
+    drawBeamDiagram(b, h, e, P / 1000);
+
+    // Show results
+    document.getElementById('results-placeholder').style.display = 'none';
+    document.getElementById('results-content').style.display = 'block';
+  }
+</script>
+</body>
+</html>
